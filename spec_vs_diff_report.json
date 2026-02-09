@@ -1,0 +1,109 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-09T06:21:50.804Z",
+  "summary": "Diff adds a Motoko canister with minimal report storage APIs, a local/offline keyword-based AI analysis module with a system prompt constant, TanStack Router routes for intake/preview/status/dashboard/details, several UI components (severity badge, status stepper, department icons), React Query hooks that persist most report/dispatch/status data to frontend storage, and a neutral Tailwind theme with severity tokens. Several BuildRequest requirements around backend persistence/schema, AI prompt verbatim embedding/JSON-only contract, and backend-side dispatch/status history are not evidenced in the diff.",
+  "missing_requirements": [
+    {
+      "id": "REQ-2",
+      "requirement": "Backend Motoko API must create/store complete emergency reports (text, media metadata/payloads, location, language, timestamps) and expose create, fetch-by-id, and list-recent; data persists in canister state across refreshes.",
+      "reason": "The backend API only creates a report with id/language/timestamp and default placeholders; it does not accept/store user description, media, or real location fields, and the list method is `getAllReports` without evidence of 'recent' ordering semantics beyond an attempted sort. Frontend appears to store the actual report payload in browser storage instead of canister state.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "AI Emergency Analysis must embed and use the provided system prompt exactly (verbatim) and produce JSON-only output with required fields (categories, severity Low/Medium/High/Critical, confidence 0–100 int, key details, department-specific dispatch messages, ISO timestamp, missing info list; non-emergency returns error JSON); analysis result stored with report and retrievable later.",
+      "reason": "The system prompt constant is present but there is no evidence it matches the user-provided prompt verbatim. The analysis function returns a typed object but the diff does not evidence enforcing 'JSON-only output' (e.g., serialization boundary) nor the full required output structure (department-specific messages exist but the file is truncated). Also, analysis is persisted to frontend storage rather than being stored/associated in backend report state.",
+      "evidence": [
+        "frontend/src/ai/systemPrompt.ts",
+        "frontend/src/ai/analyzeEmergency.ts",
+        "frontend/src/hooks/useQueries.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "After user confirms dispatch, automatically route to all departments identified by AI categories, create per-department dispatch records, simulate forwarding with visible confirmation, and store routing/dispatch history per report in the backend with timestamps.",
+      "reason": "Confirm dispatch only toggles `dispatched` flags in frontend storage; there is no evidence of per-department dispatch record creation or backend persistence of dispatch history.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "backend/main.mo",
+        "frontend/src/pages/DispatchStatusPage.tsx"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Real-time status simulation engine with ordered steps, severity-based timing, automatic advancement without refresh, and persisted status history reloadable by reopening the report view; status history recorded per step and never skips/goes backward.",
+      "reason": "UI polling exists, but the diff does not show any backend persistence of status history per report. Status appears to be derived from frontend-side helpers (`statusEngine`) and not stored in canister state; severity-based timing and step constraints are not evidenced because the engine implementation is not included in the visible diff.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Innovation feature must persist with the report record end-to-end (priority-based alerts and/or emergency contact auto-notification simulation after dispatch).",
+      "reason": "Emergency contact UI/notification is referenced in status view and stored in frontend storage, but there is no evidence it persists with the backend report record as required by the 'both' requirement.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Use React Query for async server state across create report, analyze, dispatch, fetch status, and dashboard listing with clear loading/error states; ensure end-to-end demo uses backend state appropriately.",
+      "reason": "React Query is used, but key steps (analysis, dispatch, status, dashboard listing) are driven from frontend local persistence utilities rather than backend query/update methods, which conflicts with the requested separation and backend-backed server state for the demo flow.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "backend/main.mo"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Footer includes promotional external link to caffeine.ai and a 'Built with' message.",
+      "reason": "BuildRequest does not ask for vendor promotion or external links; it could be considered unrelated UI content.",
+      "evidence": [
+        "frontend/src/components/Footer.tsx"
+      ]
+    }
+  ],
+  "confidence": 0.72,
+  "changed_files": [
+    "all_files_summary.json",
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/index.css",
+    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/ai/analyzeEmergency.ts",
+    "frontend/src/ai/systemPrompt.ts",
+    "frontend/src/components/DepartmentIcon.tsx",
+    "frontend/src/components/Footer.tsx",
+    "frontend/src/components/Header.tsx",
+    "frontend/src/components/SeverityBadge.tsx",
+    "frontend/src/components/StatusStepper.tsx",
+    "frontend/src/hooks/useActor.ts",
+    "frontend/src/hooks/useGeolocation.ts",
+    "frontend/src/hooks/useInternetIdentity.ts",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/hooks/useVoiceInput.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/utils.ts",
+    "frontend/src/main.tsx",
+    "frontend/src/pages/DispatchPreviewPage.tsx",
+    "frontend/src/pages/DispatchStatusPage.tsx",
+    "frontend/src/pages/IncidentDetailsPage.tsx",
+    "frontend/src/pages/ReportIntakePage.tsx",
+    "frontend/src/pages/ResponderDashboardPage.tsx",
+    "frontend/src/state/reportPersistence.ts",
+    "frontend/src/state/statusEngine.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}
