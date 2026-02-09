@@ -1,0 +1,158 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "Build a demo-ready AI-powered emergency reporting web application (React/Next.js) that accepts multimodal public emergency reports, uses prompt-driven AI to analyze/classify/severity-score and generate structured JSON dispatch alerts, auto-routes to departments, and simulates real-time response status tracking with a panic-friendly UI—no paid APIs.",
+  "architectural_notes": [
+    "Use React or Next.js frontend with backend API routes/server functions; external services must be mocked and app must run without paid APIs.",
+    "AI logic must be prompt-driven (no hard-coded classification rules) and must embed the provided emergency-analysis system prompt exactly.",
+    "All AI outputs must be valid structured JSON only (including error JSON for non-emergencies).",
+    "Include a status simulation engine that advances through fixed ordered states with severity-based timing.",
+    "Maintain clear separation of concerns: UI, AI logic, and state management; keep clean folder structure suitable for GitHub."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Minimal, serious emergency app logo mark (emergency-logo.dim_512x512.png)\n- Police department icon, flat and high-contrast (dept-police-icon.dim_256x256.png)\n- Ambulance/EMS department icon, flat and high-contrast (dept-ambulance-icon.dim_256x256.png)\n- Fire station department icon, flat and high-contrast (dept-fire-icon.dim_256x256.png)",
+  "existing_features": [
+    {
+      "id": "feature-create-the-core-end-to-end-emergency-reporting-flow-ui-a-single-primary-page-where-a-public-user-can-enter-an-emergency-description-in-a-large-text-box-attach-an-image-camera-first-attach-a-video-optionally-provide-voice-input-speech-to-text-when-supported-by-the-browser-optionally-share-location-gps-when-available-with-manual-entry-fallback-and-select-an-input-language-at-minimum-persist-a-language-code-alongside-the-report",
+      "title": "Create the core end-to-end emergency reporting flow UI: a single primary page where a public user can enter an emergency description in a large text box, attach an image (camera-first), attach a video, optionally provide voice input (speech-to-text when supported by the browser), optionally share location (GPS when available, with manual entry fallback), and select an input language (at minimum, persist a language code alongside the report).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-ai-emergency-analysis-service-as-a-prompt-driven-module-that-embeds-and-uses-the-provided-system-prompt-exactly-producing-json-only-output-that-includes-emergency-categories-police-ambulance-fire-station-one-or-more-severity-low-medium-high-critical-confidence-score-0-100-key-details-incident-type-people-affected-visible-risks-location-clues-department-specific-dispatch-messages-iso-8601-timestamp-and-a-missing-information-list-if-the-input-is-not-an-emergency-return-an-error-json",
+      "title": "Implement the AI Emergency Analysis service as a prompt-driven module that embeds and uses the provided system prompt exactly, producing JSON-only output that includes: emergency categories (police/ambulance/fire station; one or more), severity (low/medium/high/critical), confidence score (0–100), key details (incident type, people affected, visible risks, location clues), department-specific dispatch messages, ISO 8601 timestamp, and a missing information list; if the input is not an emergency, return an error JSON.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-dispatch-preview-and-confirmation-step-after-ai-analysis-show-a-clear-summary-categories-severity-with-color-confidence-missing-info-and-department-specific-dispatch-message-previews-allow-the-user-to-confirm-sending-or-go-back-to-edit-the-report-before-dispatching",
+      "title": "Create a dispatch preview and confirmation step: after AI analysis, show a clear summary (categories, severity with color, confidence, missing info) and department-specific dispatch message previews; allow the user to confirm sending (or go back to edit the report) before dispatching.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-automated-routing-and-simulated-forwarding-once-the-user-confirms-dispatch-automatically-route-to-all-departments-identified-by-ai-categories-record-per-department-dispatch-records-and-simulate-immediate-forwarding-with-visible-confirmation-in-the-ui",
+      "title": "Implement automated routing and simulated forwarding: once the user confirms dispatch, automatically route to all departments identified by AI categories, record per-department dispatch records, and simulate immediate forwarding with visible confirmation in the UI.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-a-real-time-status-simulation-engine-that-advances-status-in-the-correct-order-request-received-preparing-team-dispatched-on-the-way-action-in-progress-resolved-with-severity-based-timing-critical-progresses-faster-than-high-high-faster-than-medium-etc-and-display-status-clearly-to-the-user-via-a-timeline-or-stepper-ui",
+      "title": "Build a real-time status simulation engine that advances status in the correct order (Request Received → Preparing → Team Dispatched → On the Way → Action in Progress → Resolved), with severity-based timing (Critical progresses faster than High, High faster than Medium, etc.), and display status clearly to the user via a timeline or stepper UI.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-responder-dashboard-separate-view-that-shows-incoming-dispatched-incidents-filtered-sorted-by-severity-and-time-with-per-incident-details-analysis-summary-dispatch-messages-current-status-and-a-demo-safe-way-to-view-the-progression-this-dashboard-must-not-require-third-party-auth-and-can-be-protected-by-a-simple-in-app-demo-access-gate-if-needed",
+      "title": "Add a Responder Dashboard (separate view) that shows incoming dispatched incidents, filtered/sorted by severity and time, with per-incident details (analysis summary + dispatch messages + current status) and a demo-safe way to view the progression; this dashboard must not require third-party auth and can be protected by a simple in-app “demo access” gate if needed.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-at-least-one-additional-innovation-feature-beyond-the-responder-dashboard-a-priority-based-alerts-that-elevate-ui-prominence-and-sorting-for-critical-high-incidents-and-or-b-emergency-contact-auto-notification-simulation-that-lets-the-user-add-an-emergency-contact-and-shows-a-simulated-notification-event-after-dispatch-no-external-sms-email-integrations",
+      "title": "Implement at least one additional innovation feature beyond the responder dashboard: (A) Priority-based alerts that elevate UI prominence and sorting for Critical/High incidents, and/or (B) Emergency contact auto-notification simulation that lets the user add an emergency contact and shows a simulated notification event after dispatch (no external SMS/email integrations).",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-calm-emergency-friendly-visual-theme-consistently-across-the-app-typography-spacing-components-severity-color-tokens-and-layout-avoid-blue-purple-palettes-use-a-trustworthy-neutral-base-with-clear-severity-colors-green-yellow-orange-red-large-touch-targets-and-high-readability",
+      "title": "Implement a calm, emergency-friendly visual theme consistently across the app (typography, spacing, components, severity color tokens, and layout). Avoid blue/purple palettes; use a trustworthy neutral base with clear severity colors (Green/Yellow/Orange/Red), large touch targets, and high readability.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-clean-project-structure-and-separation-of-concerns-separate-modules-for-ui-components-ai-prompt-logic-and-state-management-use-react-query-for-server-state-include-clear-demo-ready-error-handling-and-loading-states-analysis-in-progress-dispatching-status-updating",
+      "title": "Ensure clean project structure and separation of concerns: separate modules for UI components, AI/prompt logic, and state management; use React Query for server state; include clear, demo-ready error handling and loading states (analysis in progress, dispatching, status updating).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-generated-static-visual-assets-that-improve-demo-realism-logo-department-icons-store-them-under-frontend-public-assets-generated-and-use-them-in-the-ui-header-brand-mark-and-department-cards-badges-without-routing-images-through-the-backend",
+      "title": "Add generated static visual assets that improve demo realism (logo + department icons), store them under frontend/public/assets/generated, and use them in the UI (header/brand mark and department cards/badges) without routing images through the backend.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Emergency report intake UI: text description, camera-first image upload, video upload, optional voice input (STT if supported), optional live location (GPS/manual), and multilingual input structure",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Prompt-driven AI emergency analysis service that ingests text/image/video and returns JSON-only: categories (police/ambulance/fire), severity (low/medium/high/critical), key details, confidence (0–100), ISO8601 timestamp, missing info list, or error JSON if not an emergency",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "AI-generated department-specific dispatch message creation with concise operational wording and user preview before sending",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Automated routing to one or multiple departments and simulated instant forwarding of dispatch alerts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Real-time status simulation engine with ordered steps (Received → Preparing → Dispatched → On the Way → Action in Progress → Resolved) and severity-based timing (critical progresses faster) displayed via timeline/stepper",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Panic-friendly UX/UI: minimal steps, large buttons, calm emergency styling, high-contrast severity color system (green/yellow/orange/red), reassuring micro-copy, no clutter/ads",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement at least two innovation features (choose from: live location map tracking, guidance chatbot assistant, priority-based alerts, responder dashboard, emergency contact auto-notification)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Project scaffolding: Next.js/React frontend + backend API routes/server functions (mock external services), structured JSON data handling, clean folder structure separating UI/AI logic/state management, GitHub-ready",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement a backend Motoko API for creating and storing emergency reports, including uploaded media metadata (and/or base64 payloads as needed for demo), location fields, language code, and timestamps; ensure data is structured JSON and persisted for the demo session.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "AI-powered Emergency Reporting & Dispatch Demo App (Multimodal intake, prompt-driven analysis, routing, status simulation)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}
