@@ -1,0 +1,345 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "AI-powered Emergency Reporting & Dispatch Demo App (Frontend-only)",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Build a single-page, panic-friendly emergency intake UI with multimodal inputs (text, image, video, optional voice, optional location, language selector).",
+      "acceptanceCriteria": [
+        "The emergency intake form supports: text + image upload + video upload.",
+        "Image upload flow is camera-first on mobile (uses capture attribute / mobile-friendly UX) and still works on desktop.",
+        "Voice input control is shown; if SpeechRecognition/WebSpeech is unavailable, the UI gracefully disables it and provides a clear fallback message.",
+        "Location section supports: (a) browser geolocation when permitted and available, and (b) manual address/landmark entry when geolocation is unavailable/denied.",
+        "A language selector exists and the chosen language code is saved with the report payload.",
+        "UI is minimal-step and panic-friendly: primary CTA is prominent, inputs are large, and the page contains reassuring micro-copy."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ReportIntakePage.tsx",
+          "operation": "create",
+          "description": "Implement the primary emergency intake page with a large description Textarea, camera-first image upload (capture attribute + mobile-friendly UX), video upload, language selector (persist language code in the in-flight report payload), optional geolocation capture with manual address/landmark fallback, and optional voice-to-text controls using WebSpeech when available; use shadcn-ui components (e.g., Button, Card, Input, Textarea, Select, Alert) for large, accessible controls. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/hooks/useVoiceInput.ts",
+          "operation": "create",
+          "description": "Add a browser-capability aware voice input hook that exposes supported/unsupported state, start/stop controls, and transcript updates; ensure graceful fallback messaging can be shown when WebSpeech APIs are unavailable."
+        },
+        {
+          "path": "frontend/src/hooks/useGeolocation.ts",
+          "operation": "create",
+          "description": "Add a geolocation hook that requests browser coordinates when permitted, captures errors/denials, and supports manual address entry fallback integration by exposing clear UI state."
+        },
+        {
+          "path": "frontend/src/state/reportPersistence.ts",
+          "operation": "create",
+          "description": "Create a frontend persistence module (e.g., localStorage-backed) for draft and submitted reports, ensuring the report payload can store: description text, media metadata/base64 where needed for demo, language code, location (coords and/or manual string), and timestamps for demo continuity across refreshes."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "create",
+          "description": "Wire the intake page into the app’s navigation/routing as the primary public flow entry, ensuring the user can start a new report with minimal steps."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement offline, prompt-driven AI emergency analysis in the frontend with JSON-only results and verbatim embedded system prompt, and associate results with reports.",
+      "acceptanceCriteria": [
+        "The exact system prompt text provided by the user is embedded verbatim in the codebase and used as the controlling prompt for analysis (no edits to its wording).",
+        "Given an emergency report payload, the system returns a single valid JSON object only (no surrounding prose) matching the required fields.",
+        "The JSON can represent multiple departments in the categories list.",
+        "Severity is one of: Low, Medium, High, Critical (case-consistent across the app).",
+        "Confidence is an integer between 0 and 100 inclusive.",
+        "Timestamp is ISO 8601 format.",
+        "If the report is deemed non-emergency, the service returns an error JSON object (still valid JSON-only).",
+        "The analysis result is stored/associated with the report and retrievable later."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/ai/systemPrompt.ts",
+          "operation": "create",
+          "description": "Embed the provided system prompt text verbatim as a single exported constant for reuse across the analysis module; do not alter wording, punctuation, or formatting."
+        },
+        {
+          "path": "frontend/src/ai/analyzeEmergency.ts",
+          "operation": "create",
+          "description": "Implement an offline, prompt-driven analysis function that uses the verbatim system prompt constant as the controlling prompt reference and returns JSON-only objects with required fields (categories, severity, confidence, key details, per-department dispatch messages, ISO timestamp, missing info list), or an error JSON object for non-emergencies."
+        },
+        {
+          "path": "frontend/src/hooks/useEmergencyAnalysis.ts",
+          "operation": "create",
+          "description": "Add a React Query-powered hook to run analysis as an async step with loading/error states; persist the analysis result into the report record via the frontend persistence module."
+        },
+        {
+          "path": "frontend/src/state/reportPersistence.ts",
+          "operation": "modify",
+          "description": "Extend report persistence to store/retrieve the AI analysis JSON result associated with a report so it can be displayed later in the flow and on the responder dashboard."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Add a dispatch preview/confirmation step after analysis with editable back-navigation, severity colors, and department-specific message previews.",
+      "acceptanceCriteria": [
+        "After analysis completes, the UI shows message previews separated by department (Police/Ambulance/Fire Station) with concise operational wording.",
+        "User can explicitly confirm dispatch; dispatch does not occur automatically without user confirmation.",
+        "User can return to editing inputs and re-run analysis.",
+        "Severity is displayed with the required high-contrast color system (Green/Yellow/Orange/Red) and a clear label.",
+        "UI includes reassuring micro-copy (e.g., “Help is being coordinated”) and avoids clutter."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/DispatchPreviewPage.tsx",
+          "operation": "create",
+          "description": "Create the dispatch preview & confirmation view that reads the stored analysis result and shows: categories, severity (with color mapping), confidence, missing info, and department-separated dispatch message previews; provide clear CTAs for “Confirm dispatch” and “Back to edit / Re-run analysis”. Use shadcn-ui components (e.g., Card, Button, Badge, Alert, Separator) to keep the UI calm and legible. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/SeverityBadge.tsx",
+          "operation": "create",
+          "description": "Implement a reusable severity badge component that enforces the required severity-to-color mapping (Green/Yellow/Orange/Red) and consistent labeling across preview, status view, and dashboard; optionally use shadcn-ui Badge styling patterns. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the preview/confirmation step into app routing/navigation so the intake page can navigate to preview after analysis, and preview can navigate back to intake for edits."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Simulate automated multi-department routing and per-department forwarding confirmations after user confirms dispatch.",
+      "acceptanceCriteria": [
+        "Dispatch action creates dispatch records for each selected department (one report may have multiple).",
+        "Frontend shows which departments were routed and confirms forwarding occurred for each.",
+        "Backend stores routing/dispatch history per report for later viewing (including timestamps)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/state/reportPersistence.ts",
+          "operation": "modify",
+          "description": "Add support for storing per-department dispatch records (department, message, forwarded confirmation state, timestamps) associated with a report; ensure records can be loaded later for the status view and dashboard."
+        },
+        {
+          "path": "frontend/src/pages/DispatchStatusPage.tsx",
+          "operation": "create",
+          "description": "Implement the post-confirmation view that shows routing results per department (icons + names) and a visible simulated forwarding confirmation for each selected department, then transitions into ongoing status tracking UI."
+        },
+        {
+          "path": "frontend/src/components/DepartmentIcon.tsx",
+          "operation": "create",
+          "description": "Create a reusable department icon component that maps department names to the generated static icons and is used consistently in the preview, routing confirmation, and responder dashboard. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the confirm-dispatch action to navigate into the post-dispatch status view and ensure routes support direct reload into an existing report’s status screen."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Implement a real-time status simulation (severity-based timing) with a visible timeline/stepper and reloadable status history.",
+      "acceptanceCriteria": [
+        "After dispatch, the user sees a timeline/stepper with the ordered statuses.",
+        "Statuses advance automatically without user refresh; the UI updates at each transition (polling is acceptable).",
+        "Timing differs by severity such that Critical completes the full progression faster than Low.",
+        "Status history (timestamps per step) is recorded and can be reloaded by reopening the report view.",
+        "Status never skips steps and never goes backward."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/state/statusEngine.ts",
+          "operation": "create",
+          "description": "Create a status simulation engine that advances strictly in-order through: Request Received → Preparing → Team Dispatched → On the Way → Action in Progress → Resolved, with severity-based timing (Critical faster than High, High faster than Medium, etc.), producing timestamped history entries that never skip or go backward."
+        },
+        {
+          "path": "frontend/src/components/StatusStepper.tsx",
+          "operation": "create",
+          "description": "Build a timeline/stepper UI component to display ordered statuses and highlight the current step; ensure it supports rendering timestamped history and uses calm, high-readability styling; use shadcn-ui primitives where appropriate (e.g., Card, Separator). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DispatchStatusPage.tsx",
+          "operation": "modify",
+          "description": "Integrate the status simulation engine to auto-advance and update UI without refresh (using timers/polling), and persist status history to the report record so reopening the report reloads the full progression history."
+        },
+        {
+          "path": "frontend/src/state/reportPersistence.ts",
+          "operation": "modify",
+          "description": "Persist per-report status history (including timestamps per step) and current status so the status view and responder dashboard can reload and reflect progression after page refresh."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add a responder dashboard view (no third-party auth) with severity/time sorting, incident details, and live status updates.",
+      "acceptanceCriteria": [
+        "A dedicated dashboard route/view exists separate from the public reporting flow.",
+        "Dashboard lists dispatched incidents with severity color badges and timestamps.",
+        "Dashboard can open an incident details view showing the AI analysis JSON fields and the department dispatch messages.",
+        "Dashboard reflects live status updates as they progress (polling is acceptable)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ResponderDashboardPage.tsx",
+          "operation": "create",
+          "description": "Create a responder dashboard view that lists dispatched incidents from persisted demo data, sorted/filtered by severity and time, showing severity badges, timestamps, and current status; ensure it refreshes/polls to reflect live status progression. Use shadcn-ui components (e.g., Table, Card, Button, Badge, Input) for a clean, readable dashboard. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/IncidentDetailsPage.tsx",
+          "operation": "create",
+          "description": "Create an incident details view reachable from the dashboard that displays AI analysis JSON fields (including missing info) plus department dispatch messages and current status/stepper."
+        },
+        {
+          "path": "frontend/src/components/DemoAccessGate.tsx",
+          "operation": "create",
+          "description": "Add an optional simple in-app demo gate component (e.g., passphrase-style local gate) to protect the responder dashboard route without requiring third-party auth; keep default flow demo-friendly."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire the responder dashboard and incident details views into app routing and add a simple navigation entry (e.g., header link) that does not disrupt the public reporting flow."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Implement at least one innovation feature beyond the dashboard (priority-based alerts and/or emergency contact notification simulation) and persist it with the report.",
+      "acceptanceCriteria": [
+        "At least one of the listed innovation options (Priority-based alerts and/or Emergency contact auto-notification simulation) is implemented in a fully usable way.",
+        "If Priority-based alerts is implemented: incidents are sorted/flagged so Critical/High stand out on the responder dashboard and/or user confirmation screens.",
+        "If Emergency contact simulation is implemented: user can enter contact name + method label (e.g., “Phone” as plain text) and the app records and displays a simulated “contact notified” event after dispatch, without using external messaging services.",
+        "The innovation feature works end-to-end in the demo flow and persists with the report record."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/pages/ReportIntakePage.tsx",
+          "operation": "modify",
+          "description": "Add an optional emergency contact section (name + method label as plain text) to the intake flow so the user can opt into an in-app notification simulation after dispatch; keep the UI minimal and panic-friendly using shadcn-ui form primitives. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DispatchStatusPage.tsx",
+          "operation": "modify",
+          "description": "After dispatch confirmation, simulate an emergency contact notification event (no external messaging) and display a visible confirmation event in the UI; record the event with a timestamp on the report so it can be viewed later."
+        },
+        {
+          "path": "frontend/src/pages/ResponderDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Implement priority-based alerts by elevating Critical/High incidents (sorting + visual prominence) and clearly marking them so they stand out in the dashboard list; reuse the SeverityBadge component for consistent severity styling."
+        },
+        {
+          "path": "frontend/src/state/reportPersistence.ts",
+          "operation": "modify",
+          "description": "Persist innovation data with the report record: emergency contact fields (if provided) and simulated notification events/timestamps; ensure responder dashboard and incident details can display them."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Apply a calm, emergency-friendly theme with neutral base colors, large touch targets, and consistent severity tokens (Green/Yellow/Orange/Red), avoiding blue/purple primary palettes.",
+      "acceptanceCriteria": [
+        "UI uses a coherent theme across public flow and responder dashboard (colors, typography, component styling).",
+        "Severity colors match the required mapping and are used consistently in badges, headers, and the status timeline/stepper.",
+        "Primary actions are large and accessible (mobile-friendly), with clear focus/hover states.",
+        "No clutter/ads/distracting elements are present; micro-copy is reassuring and action-oriented.",
+        "Theme does not rely on blue/purple as primary brand colors."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "create",
+          "description": "Define global theme tokens (CSS variables and base Tailwind layer styling) for a trustworthy neutral palette, readable typography, spacing, and high-contrast severity colors (Green/Yellow/Orange/Red) while avoiding blue/purple as primary brand colors."
+        },
+        {
+          "path": "frontend/src/components/SeverityBadge.tsx",
+          "operation": "modify",
+          "description": "Ensure severity styling uses the global severity tokens consistently (badge/background/text) and is accessible with high contrast across the app."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Apply consistent layout primitives (header, content container spacing) and large primary CTA styling patterns across routes; ensure reassuring micro-copy is used where appropriate and clutter is avoided."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Enforce clean separation of concerns with modules for UI, AI logic, and state; use React Query for server/demo state; provide demo-ready loading/error states.",
+      "acceptanceCriteria": [
+        "Frontend code is organized so AI/prompt logic is not mixed into presentational components.",
+        "React Query (or equivalent within the provided template) is used for async server state: create report, analyze, dispatch, fetch status, dashboard listing.",
+        "All key async steps show appropriate loading states and actionable error states (retry/back).",
+        "No user-facing placeholder text like “TODO” is present in the shipped UI.",
+        "App can be run end-to-end as a judge demo: report → analysis → preview → dispatch → live status → responder dashboard view."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useReportsQueries.ts",
+          "operation": "create",
+          "description": "Create React Query hooks for server/demo state actions needed by the flow (e.g., create report, load report, list reports) and merge server-returned report metadata with locally persisted analysis/dispatch/status simulation data for a cohesive demo experience."
+        },
+        {
+          "path": "frontend/src/pages/ReportIntakePage.tsx",
+          "operation": "modify",
+          "description": "Use React Query hooks to drive async states for creating/submitting a report and running analysis; add clear loading states (analysis in progress) and actionable error states (retry/back) without user-facing placeholder text. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DispatchPreviewPage.tsx",
+          "operation": "modify",
+          "description": "Add explicit loading/error UI for analysis retrieval and re-run, and ensure confirm dispatch uses a well-defined async action with clear progress and failure handling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/pages/DispatchStatusPage.tsx",
+          "operation": "modify",
+          "description": "Add clear UI states for dispatching, forwarding confirmation, and status-updating; ensure errors provide recovery actions (e.g., retry simulation, return to dashboard)."
+        },
+        {
+          "path": "frontend/src/pages/ResponderDashboardPage.tsx",
+          "operation": "modify",
+          "description": "Use React Query to fetch/refresh the incident list and incident details view models; show loading skeletons or spinners and actionable errors (retry) suitable for a live demo. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Add generated static assets (logo + department icons) under frontend/public/assets/generated and use them in the UI without backend routing.",
+      "acceptanceCriteria": [
+        "Generated images exist in frontend/public/assets/generated and are referenced directly by the frontend.",
+        "App uses the generated logo in a header/landing context and uses department icons consistently where departments are shown.",
+        "Assets are bundled as static files and do not require backend endpoints to render."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/public/assets/generated/emergency-logo.dim_512x512.png",
+          "operation": "create",
+          "description": "Add the generated static logo asset at the required path for direct frontend usage."
+        },
+        {
+          "path": "frontend/public/assets/generated/dept-police-icon.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated police department icon asset at the required path for direct frontend usage."
+        },
+        {
+          "path": "frontend/public/assets/generated/dept-ambulance-icon.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated ambulance/EMS department icon asset at the required path for direct frontend usage."
+        },
+        {
+          "path": "frontend/public/assets/generated/dept-fire-icon.dim_256x256.png",
+          "operation": "create",
+          "description": "Add the generated fire station department icon asset at the required path for direct frontend usage."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Reference the static logo at frontend/public/assets/generated/emergency-logo.dim_512x512.png in the header/brand area and ensure it appears across the public flow and responder dashboard."
+        },
+        {
+          "path": "frontend/src/components/DepartmentIcon.tsx",
+          "operation": "modify",
+          "description": "Wire department-to-icon mapping to use the static assets at frontend/public/assets/generated/dept-police-icon.dim_256x256.png, frontend/public/assets/generated/dept-ambulance-icon.dim_256x256.png, and frontend/public/assets/generated/dept-fire-icon.dim_256x256.png consistently across all department UI surfaces."
+        }
+      ]
+    }
+  ]
+}
