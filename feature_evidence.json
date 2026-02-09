@@ -1,0 +1,210 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-the-core-end-to-end-emergency-reporting-flow-ui-a-single-primary-page-where-a-public-user-can-enter-an-emergency-description-in-a-large-text-box-attach-an-image-camera-first-attach-a-video-optionally-provide-voice-input-speech-to-text-when-supported-by-the-browser-optionally-share-location-gps-when-available-with-manual-entry-fallback-and-select-an-input-language-at-minimum-persist-a-language-code-alongside-the-report",
+      "featureTitle": "Create the core end-to-end emergency reporting flow UI: a single primary page where a public user can enter an emergency description in a large text box, attach an image (camera-first), attach a video, optionally provide voice input (speech-to-text when supported by the browser), optionally share location (GPS when available, with manual entry fallback), and select an input language (at minimum, persist a language code alongside the report).",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/hooks/useGeolocation.ts",
+        "frontend/src/hooks/useVoiceInput.ts",
+        "frontend/src/pages/ReportIntakePage.tsx",
+        "frontend/src/state/reportPersistence.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-the-ai-emergency-analysis-service-as-a-prompt-driven-module-that-embeds-and-uses-the-provided-system-prompt-exactly-producing-json-only-output-that-includes-emergency-categories-police-ambulance-fire-station-one-or-more-severity-low-medium-high-critical-confidence-score-0-100-key-details-incident-type-people-affected-visible-risks-location-clues-department-specific-dispatch-messages-iso-8601-timestamp-and-a-missing-information-list-if-the-input-is-not-an-emergency-return-an-error-json",
+      "featureTitle": "Implement the AI Emergency Analysis service as a prompt-driven module that embeds and uses the provided system prompt exactly, producing JSON-only output that includes: emergency categories (police/ambulance/fire station; one or more), severity (low/medium/high/critical), confidence score (0–100), key details (incident type, people affected, visible risks, location clues), department-specific dispatch messages, ISO 8601 timestamp, and a missing information list; if the input is not an emergency, return an error JSON.",
+      "files": [
+        "frontend/src/ai/analyzeEmergency.ts",
+        "frontend/src/ai/systemPrompt.ts",
+        "frontend/src/state/reportPersistence.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-dispatch-preview-and-confirmation-step-after-ai-analysis-show-a-clear-summary-categories-severity-with-color-confidence-missing-info-and-department-specific-dispatch-message-previews-allow-the-user-to-confirm-sending-or-go-back-to-edit-the-report-before-dispatching",
+      "featureTitle": "Create a dispatch preview and confirmation step: after AI analysis, show a clear summary (categories, severity with color, confidence, missing info) and department-specific dispatch message previews; allow the user to confirm sending (or go back to edit the report) before dispatching.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/SeverityBadge.tsx",
+        "frontend/src/pages/DispatchPreviewPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-automated-routing-and-simulated-forwarding-once-the-user-confirms-dispatch-automatically-route-to-all-departments-identified-by-ai-categories-record-per-department-dispatch-records-and-simulate-immediate-forwarding-with-visible-confirmation-in-the-ui",
+      "featureTitle": "Implement automated routing and simulated forwarding: once the user confirms dispatch, automatically route to all departments identified by AI categories, record per-department dispatch records, and simulate immediate forwarding with visible confirmation in the UI.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/DepartmentIcon.tsx",
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "frontend/src/state/reportPersistence.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-build-a-real-time-status-simulation-engine-that-advances-status-in-the-correct-order-request-received-preparing-team-dispatched-on-the-way-action-in-progress-resolved-with-severity-based-timing-critical-progresses-faster-than-high-high-faster-than-medium-etc-and-display-status-clearly-to-the-user-via-a-timeline-or-stepper-ui",
+      "featureTitle": "Build a real-time status simulation engine that advances status in the correct order (Request Received → Preparing → Team Dispatched → On the Way → Action in Progress → Resolved), with severity-based timing (Critical progresses faster than High, High faster than Medium, etc.), and display status clearly to the user via a timeline or stepper UI.",
+      "files": [
+        "frontend/src/components/StatusStepper.tsx",
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "frontend/src/state/reportPersistence.ts",
+        "frontend/src/state/statusEngine.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-responder-dashboard-separate-view-that-shows-incoming-dispatched-incidents-filtered-sorted-by-severity-and-time-with-per-incident-details-analysis-summary-dispatch-messages-current-status-and-a-demo-safe-way-to-view-the-progression-this-dashboard-must-not-require-third-party-auth-and-can-be-protected-by-a-simple-in-app-demo-access-gate-if-needed",
+      "featureTitle": "Add a Responder Dashboard (separate view) that shows incoming dispatched incidents, filtered/sorted by severity and time, with per-incident details (analysis summary + dispatch messages + current status) and a demo-safe way to view the progression; this dashboard must not require third-party auth and can be protected by a simple in-app “demo access” gate if needed.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/pages/IncidentDetailsPage.tsx",
+        "frontend/src/pages/ResponderDashboardPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-at-least-one-additional-innovation-feature-beyond-the-responder-dashboard-a-priority-based-alerts-that-elevate-ui-prominence-and-sorting-for-critical-high-incidents-and-or-b-emergency-contact-auto-notification-simulation-that-lets-the-user-add-an-emergency-contact-and-shows-a-simulated-notification-event-after-dispatch-no-external-sms-email-integrations",
+      "featureTitle": "Implement at least one additional innovation feature beyond the responder dashboard: (A) Priority-based alerts that elevate UI prominence and sorting for Critical/High incidents, and/or (B) Emergency contact auto-notification simulation that lets the user add an emergency contact and shows a simulated notification event after dispatch (no external SMS/email integrations).",
+      "files": [
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "frontend/src/pages/ReportIntakePage.tsx",
+        "frontend/src/pages/ResponderDashboardPage.tsx",
+        "frontend/src/state/reportPersistence.ts"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-a-calm-emergency-friendly-visual-theme-consistently-across-the-app-typography-spacing-components-severity-color-tokens-and-layout-avoid-blue-purple-palettes-use-a-trustworthy-neutral-base-with-clear-severity-colors-green-yellow-orange-red-large-touch-targets-and-high-readability",
+      "featureTitle": "Implement a calm, emergency-friendly visual theme consistently across the app (typography, spacing, components, severity color tokens, and layout). Avoid blue/purple palettes; use a trustworthy neutral base with clear severity colors (Green/Yellow/Orange/Red), large touch targets, and high readability.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/SeverityBadge.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-clean-project-structure-and-separation-of-concerns-separate-modules-for-ui-components-ai-prompt-logic-and-state-management-use-react-query-for-server-state-include-clear-demo-ready-error-handling-and-loading-states-analysis-in-progress-dispatching-status-updating",
+      "featureTitle": "Ensure clean project structure and separation of concerns: separate modules for UI components, AI/prompt logic, and state management; use React Query for server state; include clear, demo-ready error handling and loading states (analysis in progress, dispatching, status updating).",
+      "files": [
+        "frontend/src/pages/DispatchPreviewPage.tsx",
+        "frontend/src/pages/DispatchStatusPage.tsx",
+        "frontend/src/pages/ReportIntakePage.tsx",
+        "frontend/src/pages/ResponderDashboardPage.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-10"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-generated-static-visual-assets-that-improve-demo-realism-logo-department-icons-store-them-under-frontend-public-assets-generated-and-use-them-in-the-ui-header-brand-mark-and-department-cards-badges-without-routing-images-through-the-backend",
+      "featureTitle": "Add generated static visual assets that improve demo realism (logo + department icons), store them under frontend/public/assets/generated, and use them in the UI (header/brand mark and department cards/badges) without routing images through the backend.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/DepartmentIcon.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-11"
+      ],
+      "confidence": "high"
+    }
+  ]
+}
