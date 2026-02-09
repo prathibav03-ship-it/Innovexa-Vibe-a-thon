@@ -1,0 +1,268 @@
+{
+  "kind": "build_request",
+  "title": "AI-powered Emergency Reporting & Dispatch Demo App (Multimodal intake, prompt-driven analysis, routing, status simulation)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "text": "Create the core end-to-end emergency reporting flow UI: a single primary page where a public user can enter an emergency description in a large text box, attach an image (camera-first), attach a video, optionally provide voice input (speech-to-text when supported by the browser), optionally share location (GPS when available, with manual entry fallback), and select an input language (at minimum, persist a language code alongside the report).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "1️⃣ USER EMERGENCY INPUT • Large text box for emergency description • Image upload (camera-first) • Video upload • Optional voice input (speech-to-text if supported) • Optional live location sharing (GPS/manual) • Multi-language input support (at least structure for it)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The emergency intake form supports: text + image upload + video upload.",
+        "Image upload flow is camera-first on mobile (uses capture attribute / mobile-friendly UX) and still works on desktop.",
+        "Voice input control is shown; if SpeechRecognition/WebSpeech is unavailable, the UI gracefully disables it and provides a clear fallback message.",
+        "Location section supports: (a) browser geolocation when permitted and available, and (b) manual address/landmark entry when geolocation is unavailable/denied.",
+        "A language selector exists and the chosen language code is saved with the report payload.",
+        "UI is minimal-step and panic-friendly: primary CTA is prominent, inputs are large, and the page contains reassuring micro-copy."
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "text": "Implement a backend Motoko API for creating and storing emergency reports, including uploaded media metadata (and/or base64 payloads as needed for demo), location fields, language code, and timestamps; ensure data is structured JSON and persisted for the demo session.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Data handling: Structured JSON",
+          "Deliverable requirements • Fully working website • Demo-ready emergency flow"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes update/query methods to: create a new report, fetch a report by ID, and list recent reports for demo purposes.",
+        "Stored report data includes: user text, optional media references/payloads, optional location (GPS coords and/or manual string), selected language code, and created timestamp.",
+        "All data exchanged between frontend and backend uses structured JSON-compatible types.",
+        "Data persists in canister state across page refreshes during the demo."
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "text": "Implement the AI Emergency Analysis service as a prompt-driven module that embeds and uses the provided system prompt exactly, producing JSON-only output that includes: emergency categories (police/ambulance/fire station; one or more), severity (low/medium/high/critical), confidence score (0–100), key details (incident type, people affected, visible risks, location clues), department-specific dispatch messages, ISO 8601 timestamp, and a missing information list; if the input is not an emergency, return an error JSON.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Use the following system prompt exactly for emergency analysis:\n\n\"You are an AI Emergency Dispatch Intelligence System used in real-world crisis reporting.\n\nRules:\n1. Never guess missing information.\n2. One incident may involve multiple departments.\n3. Prioritize human life over property.\n4. Output valid JSON only.\n\nReturn:\n• emergency categories\n• severity\n• confidence score\n• structured dispatch messages\n• timestamp\n• missing information list\n\nIf input is not an emergency, return an error JSON.\"",
+          "2️⃣ AI EMERGENCY ANALYSIS",
+          "ALL AI OUTPUT MUST BE STRUCTURED JSON."
+        ]
+      },
+      "acceptanceCriteria": [
+        "The exact system prompt text provided by the user is embedded verbatim in the codebase and used as the controlling prompt for analysis (no edits to its wording).",
+        "Given an emergency report payload, the system returns a single valid JSON object only (no surrounding prose) matching the required fields.",
+        "The JSON can represent multiple departments in the categories list.",
+        "Severity is one of: Low, Medium, High, Critical (case-consistent across the app).",
+        "Confidence is an integer between 0 and 100 inclusive.",
+        "Timestamp is ISO 8601 format.",
+        "If the report is deemed non-emergency, the service returns an error JSON object (still valid JSON-only).",
+        "The analysis result is stored/associated with the report and retrievable later."
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "text": "Create a dispatch preview and confirmation step: after AI analysis, show a clear summary (categories, severity with color, confidence, missing info) and department-specific dispatch message previews; allow the user to confirm sending (or go back to edit the report) before dispatching.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "3️⃣ AI DISPATCH MESSAGE GENERATION • Generate clear, professional, department-specific dispatch messages • Show message preview to user before sending",
+          "6️⃣ USER EXPERIENCE (HIGH PRIORITY) • Panic-friendly design • Minimal steps • Large buttons • Reassuring micro-copy"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After analysis completes, the UI shows message previews separated by department (Police/Ambulance/Fire Station) with concise operational wording.",
+        "User can explicitly confirm dispatch; dispatch does not occur automatically without user confirmation.",
+        "User can return to editing inputs and re-run analysis.",
+        "Severity is displayed with the required high-contrast color system (Green/Yellow/Orange/Red) and a clear label.",
+        "UI includes reassuring micro-copy (e.g., “Help is being coordinated”) and avoids clutter."
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "text": "Implement automated routing and simulated forwarding: once the user confirms dispatch, automatically route to all departments identified by AI categories, record per-department dispatch records, and simulate immediate forwarding with visible confirmation in the UI.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "4️⃣ AUTOMATED ROUTING • Automatically select relevant departments • Support multi-department routing • Simulate instant forwarding to departments"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Dispatch action creates dispatch records for each selected department (one report may have multiple).",
+        "Frontend shows which departments were routed and confirms forwarding occurred for each.",
+        "Backend stores routing/dispatch history per report for later viewing (including timestamps)."
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "text": "Build a real-time status simulation engine that advances status in the correct order (Request Received → Preparing → Team Dispatched → On the Way → Action in Progress → Resolved), with severity-based timing (Critical progresses faster than High, High faster than Medium, etc.), and display status clearly to the user via a timeline or stepper UI.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "5️⃣ REAL-TIME STATUS TRACKING",
+          "Rules:\n• Status must update in correct order\n• Critical incidents progress faster\n• Status visible clearly to user via timeline or stepper UI",
+          "STATUS ENGINE LOGIC\nBuild a status simulation engine that:\n• Advances status automatically\n• Uses severity to control timing\n• Feels real-time during demo"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After dispatch, the user sees a timeline/stepper with the ordered statuses.",
+        "Statuses advance automatically without user refresh; the UI updates at each transition (polling is acceptable).",
+        "Timing differs by severity such that Critical completes the full progression faster than Low.",
+        "Status history (timestamps per step) is recorded and can be reloaded by reopening the report view.",
+        "Status never skips steps and never goes backward."
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Add a Responder Dashboard (separate view) that shows incoming dispatched incidents, filtered/sorted by severity and time, with per-incident details (analysis summary + dispatch messages + current status) and a demo-safe way to view the progression; this dashboard must not require third-party auth and can be protected by a simple in-app “demo access” gate if needed.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "7️⃣ OPTIONAL INNOVATION (IMPLEMENT AT LEAST 2) • Responder dashboard (separate view)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A dedicated dashboard route/view exists separate from the public reporting flow.",
+        "Dashboard lists dispatched incidents with severity color badges and timestamps.",
+        "Dashboard can open an incident details view showing the AI analysis JSON fields and the department dispatch messages.",
+        "Dashboard reflects live status updates as they progress (polling is acceptable)."
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Implement at least one additional innovation feature beyond the responder dashboard: (A) Priority-based alerts that elevate UI prominence and sorting for Critical/High incidents, and/or (B) Emergency contact auto-notification simulation that lets the user add an emergency contact and shows a simulated notification event after dispatch (no external SMS/email integrations).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "7️⃣ OPTIONAL INNOVATION (IMPLEMENT AT LEAST 2) • Priority-based alerts • Emergency contact auto-notification"
+        ]
+      },
+      "acceptanceCriteria": [
+        "At least one of the listed innovation options (Priority-based alerts and/or Emergency contact auto-notification simulation) is implemented in a fully usable way.",
+        "If Priority-based alerts is implemented: incidents are sorted/flagged so Critical/High stand out on the responder dashboard and/or user confirmation screens.",
+        "If Emergency contact simulation is implemented: user can enter contact name + method label (e.g., “Phone” as plain text) and the app records and displays a simulated “contact notified” event after dispatch, without using external messaging services.",
+        "The innovation feature works end-to-end in the demo flow and persists with the report record."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Implement a calm, emergency-friendly visual theme consistently across the app (typography, spacing, components, severity color tokens, and layout). Avoid blue/purple palettes; use a trustworthy neutral base with clear severity colors (Green/Yellow/Orange/Red), large touch targets, and high readability.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Styling: Modern, calm, emergency-friendly UI",
+          "6️⃣ USER EXPERIENCE (HIGH PRIORITY) • Panic-friendly design • Minimal steps • Large buttons • High contrast severity colors: - Green → Low - Yellow → Medium - Orange → High - Red → Critical"
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI uses a coherent theme across public flow and responder dashboard (colors, typography, component styling).",
+        "Severity colors match the required mapping and are used consistently in badges, headers, and the status timeline/stepper.",
+        "Primary actions are large and accessible (mobile-friendly), with clear focus/hover states.",
+        "No clutter/ads/distracting elements are present; micro-copy is reassuring and action-oriented.",
+        "Theme does not rely on blue/purple as primary brand colors."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Ensure clean project structure and separation of concerns: separate modules for UI components, AI/prompt logic, and state management; use React Query for server state; include clear, demo-ready error handling and loading states (analysis in progress, dispatching, status updating).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Deliverable requirements • Clean folder structure • Clear separation of: • UI • AI logic • State management",
+          "Quality bar ... No shortcuts. No placeholders like “TODO”."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend code is organized so AI/prompt logic is not mixed into presentational components.",
+        "React Query (or equivalent within the provided template) is used for async server state: create report, analyze, dispatch, fetch status, dashboard listing.",
+        "All key async steps show appropriate loading states and actionable error states (retry/back).",
+        "No user-facing placeholder text like “TODO” is present in the shipped UI.",
+        "App can be run end-to-end as a judge demo: report → analysis → preview → dispatch → live status → responder dashboard view."
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Add generated static visual assets that improve demo realism (logo + department icons), store them under frontend/public/assets/generated, and use them in the UI (header/brand mark and department cards/badges) without routing images through the backend.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "This app must look serious, intelligent, and trustworthy."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Generated images exist in frontend/public/assets/generated and are referenced directly by the frontend.",
+        "App uses the generated logo in a header/landing context and uses department icons consistently where departments are shown.",
+        "Assets are bundled as static files and do not require backend endpoints to render."
+      ]
+    }
+  ],
+  "constraints": [
+    "Use the provided stack: React + TypeScript + Tailwind + shadcn UI components composed (do not edit immutable UI component sources).",
+    "Backend must be Motoko in a single main actor (no additional backend services).",
+    "No paid APIs; the demo must work offline/without external AI services.",
+    "Do not use third-party authentication providers; if auth is needed, use Internet Identity only (but do not require it for the core demo flow).",
+    "No external messaging (SMS/email) integrations; emergency contact notifications must be simulated in-app.",
+    "All AI analysis output must be JSON-only and must embed the provided system prompt exactly (verbatim)."
+  ],
+  "nonGoals": [
+    "Integrating real emergency service APIs (911/dispatch systems).",
+    "True computer vision analysis of images/videos using external AI services.",
+    "Real-time communication via WebSockets or push notifications.",
+    "Production-grade identity verification or role-based access control beyond a demo-appropriate gate.",
+    "Storing large media files in a production-optimized way; demo-appropriate handling is sufficient."
+  ],
+  "imageRequirements": {
+    "required": [
+      "Minimal, serious emergency app logo mark (emergency-logo.dim_512x512.png)",
+      "Police department icon, flat and high-contrast (dept-police-icon.dim_256x256.png)",
+      "Ambulance/EMS department icon, flat and high-contrast (dept-ambulance-icon.dim_256x256.png)",
+      "Fire station department icon, flat and high-contrast (dept-fire-icon.dim_256x256.png)"
+    ],
+    "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "User-facing text must be English in the produced app copy."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
+  }
+}
